@@ -1,4 +1,4 @@
-use std::{fs, env};
+use std::{env, fs};
 
 fn to_u32(bits: &[u8]) -> u32 {
     bits.iter().fold(0, |acc, &b| acc * 2 + b as u32)
@@ -6,8 +6,7 @@ fn to_u32(bits: &[u8]) -> u32 {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let input = fs::read_to_string(&args[1])
-        .expect("Can't read input file");
+    let input = fs::read_to_string(&args[1]).expect("Can't read input file");
 
     let thres = input.lines().count() as f32 / 2.0;
     println!("Line count: {}", input.lines().count());
@@ -16,7 +15,9 @@ fn main() {
     let mut counts = [0; 12];
     for line in input.lines() {
         for (i, char) in line.chars().enumerate() {
-            counts[i] += char.to_digit(10).expect("Failed to parse character as number");
+            counts[i] += char
+                .to_digit(10)
+                .expect("Failed to parse character as number");
         }
     }
 
