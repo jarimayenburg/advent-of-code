@@ -4,16 +4,16 @@ use std::path::Path;
 
 #[derive(Debug)]
 enum Outcome {
-    Tie,
     Lose,
+    Tie,
     Win,
 }
 
 impl Outcome {
     fn from_int(result: i32) -> Outcome {
         match result.rem_euclid(3) {
-            0 => Outcome::Tie,
-            1 => Outcome::Lose,
+            0 => Outcome::Lose,
+            1 => Outcome::Tie,
             2 => Outcome::Win,
             _ => panic!("Invalid result value {}", result),
         }
