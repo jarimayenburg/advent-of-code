@@ -3,6 +3,24 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 #[derive(Debug)]
+enum Outcome {
+    Tie,
+    Lose,
+    Win,
+}
+
+impl Outcome {
+    fn from_int(result: i32) -> Outcome {
+        match result.rem_euclid(3) {
+            0 => Outcome::Tie,
+            1 => Outcome::Lose,
+            2 => Outcome::Win,
+            _ => panic!("Invalid result value {}", result),
+        }
+    }
+}
+
+#[derive(Debug)]
 enum Hand {
     Rock,
     Paper,
@@ -21,13 +39,17 @@ impl Hand {
         }
     }
 
-    fn play(&self, theirs: &Hand) -> i32 {
-        let result = (*self as i32 - *theirs as i32 + 1).rem_euclid(3);
-
-        let result_points = result * 3;
+    fn points(&self, outcome: &Outcome) -> i32 {
+        let result_points = *outcome as i32 * 3;
         let choice_points = *self as i32 + 1;
 
         result_points + choice_points
+    }
+
+    fn play(&self, theirs: &Hand) -> i32 {
+        let outcome = Outcome::from_int(*self as i32 - *theirs as i32 + 1);
+
+        self.points(&outcome)
     }
 }
 
