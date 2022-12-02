@@ -2,6 +2,10 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+trait FromChar<T> {
+    fn from_char(char: &char) -> T;
+}
+
 #[derive(Debug)]
 enum Outcome {
     Lose,
@@ -20,6 +24,17 @@ impl Outcome {
     }
 }
 
+impl FromChar<Outcome> for Outcome {
+    fn from_char(char: &char) -> Outcome {
+        match char {
+            'X' => Outcome::Lose,
+            'Y' => Outcome::Tie,
+            'Z' => Outcome::Win,
+            _ => panic!("Invalid value: {}", char),
+        }
+    }
+}
+
 #[derive(Debug)]
 enum Hand {
     Rock,
@@ -28,17 +43,6 @@ enum Hand {
 }
 
 impl Hand {
-    fn from_char(char: &char) -> Hand {
-        let val = (*char as u32 - 'A' as u32) % 23;
-
-        match val {
-            0 => Hand::Rock,
-            1 => Hand::Paper,
-            2 => Hand::Scissors,
-            _ => panic!("Invalid hand value {}", char),
-        }
-    }
-
     fn points(&self, outcome: &Outcome) -> i32 {
         let result_points = *outcome as i32 * 3;
         let choice_points = *self as i32 + 1;
@@ -53,10 +57,24 @@ impl Hand {
     }
 }
 
+impl FromChar<Hand> for Hand {
+    fn from_char(char: &char) -> Hand {
+        let val = (*char as u32 - 'A' as u32) % 23;
+
+        match val {
+            0 => Hand::Rock,
+            1 => Hand::Paper,
+            2 => Hand::Scissors,
+            _ => panic!("Invalid hand value {}", char),
+        }
+    }
+}
+
 fn part1() -> i32 {
     read_games("input.txt")
         .iter()
-        .map(|(theirs, ours)| ours.play(theirs))
+        .map(|hand_strs| (Hand::from_char(&hand_strs.0), Hand::from_char(&hand_strs.1)))
+        .map(|(theirs, ours)| ours.play(&theirs))
         .sum()
 }
 
@@ -64,7 +82,7 @@ fn main() {
     println!("Part 1: The score is {}", part1());
 }
 
-fn read_games<P>(filename: P) -> Vec<(Hand, Hand)>
+fn read_games<P>(filename: P) -> Vec<(char, char)>
 where
     P: AsRef<Path>,
 {
@@ -72,14 +90,8 @@ where
         .map(|line| line.unwrap())
         .map(|line| {
             line.split_once(" ")
-                .map(|(c1, c2)| (c1.to_owned(), c2.to_owned()))
+                .map(|(c1, c2)| (c1.chars().next().unwrap(), c2.chars().next().unwrap()))
                 .unwrap()
-        })
-        .map(|hand_strs| {
-            (
-                Hand::from_char(&hand_strs.0.chars().next().unwrap()),
-                Hand::from_char(&hand_strs.1.chars().next().unwrap()),
-            )
         })
         .collect()
 }
