@@ -43,6 +43,15 @@ enum Hand {
 }
 
 impl Hand {
+    fn from_int(int: i32) -> Hand {
+        match int.rem_euclid(3) {
+            0 => Hand::Rock,
+            1 => Hand::Paper,
+            2 => Hand::Scissors,
+            _ => panic!("Invalid hand value {}", int),
+        }
+    }
+
     fn points(&self, outcome: &Outcome) -> i32 {
         let result_points = *outcome as i32 * 3;
         let choice_points = *self as i32 + 1;
@@ -55,31 +64,48 @@ impl Hand {
 
         self.points(&outcome)
     }
+
+    /// Returns which hand should be played against this hand to achieve the desired outcome
+    fn achieve(&self, outcome: &Outcome) -> Hand {
+        Hand::from_int(*self as i32 + (*outcome as i32 - 1))
+    }
 }
 
 impl FromChar<Hand> for Hand {
     fn from_char(char: &char) -> Hand {
-        let val = (*char as u32 - 'A' as u32) % 23;
-
-        match val {
-            0 => Hand::Rock,
-            1 => Hand::Paper,
-            2 => Hand::Scissors,
-            _ => panic!("Invalid hand value {}", char),
-        }
+        Hand::from_int((*char as i32 - 'A' as i32) % 23)
     }
 }
 
 fn part1() -> i32 {
     read_games("input.txt")
         .iter()
-        .map(|hand_strs| (Hand::from_char(&hand_strs.0), Hand::from_char(&hand_strs.1)))
+        .map(|hand_chars| {
+            (
+                Hand::from_char(&hand_chars.0),
+                Hand::from_char(&hand_chars.1),
+            )
+        })
+        .map(|(theirs, ours)| ours.play(&theirs))
+        .sum()
+}
+
+fn part2() -> i32 {
+    read_games("input.txt")
+        .iter()
+        .map(|chars| (Hand::from_char(&chars.0), Outcome::from_char(&chars.1)))
+        .map(|(theirs, outcome)| {
+            let ours = theirs.achieve(&outcome);
+
+            (theirs, ours)
+        })
         .map(|(theirs, ours)| ours.play(&theirs))
         .sum()
 }
 
 fn main() {
     println!("Part 1: The score is {}", part1());
+    println!("Part 2: The score is {}", part2());
 }
 
 fn read_games<P>(filename: P) -> Vec<(char, char)>
