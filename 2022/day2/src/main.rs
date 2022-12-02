@@ -31,10 +31,10 @@ impl Hand {
     }
 }
 
-fn main() {
+fn part1() -> i32 {
     let mut score = 0;
 
-    for line_res in read_lines("../input.txt") {
+    for line_res in read_lines("input.txt") {
         match line_res {
             Ok(line) => {
                 let hands = line
@@ -49,7 +49,11 @@ fn main() {
         };
     }
 
-    println!("The score is: {}", score);
+    score
+}
+
+fn main() {
+    println!("Part 1: The score is {}", part1());
 }
 
 fn read_lines<P>(filename: P) -> io::Lines<io::BufReader<File>>
