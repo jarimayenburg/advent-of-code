@@ -4,6 +4,33 @@ use aoc_2022::read_lines;
 
 type Item = char;
 
+type Compartment = Vec<Item>;
+
+type Rucksack = (Compartment, Compartment);
+
+type Group = Vec<Rucksack>;
+
+trait Badge {
+    fn badge(&self) -> Item;
+}
+
+impl Badge for Group {
+    fn badge(&self) -> Item {
+        let mut shared_items: HashSet<&Item> = HashSet::from_iter(self[0].all_items());
+
+        for rucksack in self {
+            let items = HashSet::from_iter(rucksack.all_items());
+
+            shared_items = shared_items
+                .intersection(&items)
+                .map(|a| a.to_owned())
+                .collect::<HashSet<&Item>>();
+        }
+
+        **shared_items.iter().next().unwrap()
+    }
+}
+
 trait Prioritize {
     fn priority(&self) -> u32;
 }
@@ -18,15 +45,12 @@ impl Prioritize for Item {
     }
 }
 
-type Compartment = Vec<Item>;
-
-type Rucksack = (Compartment, Compartment);
-
-trait CommonItem {
+trait Items {
     fn common_items(&self) -> Vec<&Item>;
+    fn all_items(&self) -> Vec<&Item>;
 }
 
-impl CommonItem for Rucksack {
+impl Items for Rucksack {
     /// Find the items that are in both compartments
     fn common_items(&self) -> Vec<&Item> {
         let comp1_set: HashSet<&Item> = HashSet::from_iter(self.0.iter());
@@ -37,9 +61,13 @@ impl CommonItem for Rucksack {
             .map(|i| i.to_owned())
             .collect()
     }
+
+    fn all_items(&self) -> Vec<&Item> {
+        self.0.iter().chain(self.1.iter()).collect()
+    }
 }
 
-fn part1(rucksacks: Vec<Rucksack>) -> u32 {
+fn part1(rucksacks: &Vec<Rucksack>) -> u32 {
     rucksacks
         .iter()
         .flat_map(|rucksack| rucksack.common_items())
@@ -47,10 +75,20 @@ fn part1(rucksacks: Vec<Rucksack>) -> u32 {
         .sum()
 }
 
+fn part2(rucksacks: &Vec<Rucksack>) -> u32 {
+    rucksacks
+        .chunks(3)
+        .map(|s| s.to_owned())
+        .map(|group: Group| group.badge())
+        .map(|badge| badge.priority())
+        .sum()
+}
+
 fn main() {
     let rucksacks = read_rucksacks();
 
-    println!("Part1: {}", part1(rucksacks));
+    println!("Part 1: {}", part1(&rucksacks));
+    println!("Part 2: {}", part2(&rucksacks));
 }
 
 fn read_rucksacks() -> Vec<Rucksack> {
