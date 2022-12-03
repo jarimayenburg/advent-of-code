@@ -1,6 +1,6 @@
-use std::fs::File;
-use std::io::{self, BufRead};
 use std::path::Path;
+
+use aoc_2022::read_lines;
 
 trait FromChar<T> {
     fn from_char(char: &char) -> T;
@@ -78,7 +78,7 @@ impl FromChar<Hand> for Hand {
 }
 
 fn part1() -> i32 {
-    read_games("input.txt")
+    read_games("inputs/day2.txt")
         .iter()
         .map(|hand_chars| {
             (
@@ -91,7 +91,7 @@ fn part1() -> i32 {
 }
 
 fn part2() -> i32 {
-    read_games("input.txt")
+    read_games("inputs/day2.txt")
         .iter()
         .map(|chars| (Hand::from_char(&chars.0), Outcome::from_char(&chars.1)))
         .map(|(theirs, outcome)| {
@@ -120,16 +120,4 @@ where
                 .unwrap()
         })
         .collect()
-}
-
-fn read_lines<P>(filename: P) -> io::Lines<io::BufReader<File>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename);
-
-    match file {
-        Ok(file) => io::BufReader::new(file).lines(),
-        Err(error) => panic!("Problem opening the file: {:?}", error),
-    }
 }
