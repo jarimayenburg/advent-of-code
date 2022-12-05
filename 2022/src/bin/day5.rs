@@ -6,13 +6,25 @@ type Stack = Vec<Crate>;
 
 type Instruction = (usize, usize, usize);
 
-fn part1(mut stacks: Vec<Stack>, instructions: Vec<Instruction>) -> String {
+fn part1(mut stacks: Vec<Stack>, instructions: &Vec<Instruction>) -> String {
     for (amount, from, to) in instructions {
-        for _ in 0..amount {
-            let c = stacks[from].pop().unwrap();
+        for _ in 0..*amount {
+            let c = stacks[*from].pop().unwrap();
 
-            stacks[to].push(c);
+            stacks[*to].push(c);
         }
+    }
+
+    stacks.iter().map(|stack| stack.last().unwrap()).collect()
+}
+
+fn part2(mut stacks: Vec<Stack>, instructions: &Vec<Instruction>) -> String {
+    for (amount, from, to) in instructions {
+        let from_len = stacks[*from].len();
+
+        let mut crates = stacks[*from].drain(from_len - amount..).collect();
+
+        stacks[*to].append(&mut crates);
     }
 
     stacks.iter().map(|stack| stack.last().unwrap()).collect()
@@ -21,7 +33,8 @@ fn part1(mut stacks: Vec<Stack>, instructions: Vec<Instruction>) -> String {
 fn main() {
     let (stacks, instructions) = read_input();
 
-    println!("Part1: {}", part1(stacks, instructions));
+    println!("Part 1: {}", part1(stacks.clone(), &instructions));
+    println!("Part 2: {}", part2(stacks, &instructions));
 }
 
 fn read_input() -> (Vec<Stack>, Vec<Instruction>) {
